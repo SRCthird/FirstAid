@@ -383,6 +383,9 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel implements Look
     public void runScaleLogic(Player player) {
         if (FirstAidConfig.SERVER.scaleMaxHealth.get()) { //Attempt to calculate the max health of the body parts based on the maxHealth attribute
             player.level().getProfiler().push("healthscaling");
+            if (FirstAidConfig.GENERAL.debug.get()) {
+                FirstAid.LOGGER.info("[FirstAid scale] player={} tick={} vanillaMax={} prevScaleFactor={} limbMaxTotal={}", player.getName().getString(), player.tickCount, player.getMaxHealth(), prevScaleFactor, getCurrentMaxHealth());
+            }
             float globalFactor = player.getMaxHealth() / 20F;
             if (prevScaleFactor != globalFactor) {
                 if (FirstAidConfig.GENERAL.debug.get()) {
