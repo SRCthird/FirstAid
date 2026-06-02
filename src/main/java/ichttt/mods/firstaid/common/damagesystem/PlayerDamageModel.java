@@ -401,12 +401,15 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel implements Look
         if (player.level().isClientSide) {
             return;
         }
+        if (player.isRemoved() || !player.isAlive() || player.isDeadOrDying() || player.getHealth() <= 0F || isDead(player)) {
+            return;
+        }
         player.level().getProfiler().push("healthscaling");
         if (FirstAidConfig.GENERAL.debug.get()) {
             FirstAid.LOGGER.info("[FirstAid scale] player={} tick={} vanillaMax={} prevScaleFactor={} limbMaxTotal={}", player.getName().getString(), player.tickCount, player.getMaxHealth(), prevScaleFactor, getCurrentMaxHealth());
         }
         float globalFactor = player.getMaxHealth() / 20F;
-        if (prevScaleFactor != globalFactor) {
+        if (Math.abs(prevScaleFactor - globalFactor) > 0.0001F) {
             if (FirstAidConfig.GENERAL.debug.get()) { 
                 FirstAid.LOGGER.info( "Starting health scaling factor {} -> {} (max health {})", prevScaleFactor, globalFactor, player.getMaxHealth());
             }
@@ -499,11 +502,8 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel implements Look
                 }
                 part.setMaxHealth(target.target);
             }
-            if (changed && player instanceof ServerPlayer serverPlayer) {
-                FirstAid.NETWORKING.send(
-                        PacketDistributor.PLAYER.with(() -> serverPlayer),
-                        new MessageSyncDamageModel(this, true)
-                );
+            if (changed) {
+                scheduleResync();
             }
             player.level().getProfiler().pop();
         }
