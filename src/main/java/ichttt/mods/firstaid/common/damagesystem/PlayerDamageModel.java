@@ -395,10 +395,10 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel implements Look
 
     @Override
     public void runScaleLogic(Player player) {
-        if (!FirstAidConfig.SERVER.scaleMaxHealth.get()) {
-            return;
-        }
         if (player.level().isClientSide) {
+          return;
+        }
+        if (!FirstAidConfig.SERVER.scaleMaxHealth.get()) {
             return;
         }
         if (player.isRemoved() || !player.isAlive() || player.isDeadOrDying() || player.getHealth() <= 0F || isDead(player)) {

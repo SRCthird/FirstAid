@@ -185,27 +185,32 @@ public class DamageablePart extends AbstractDamageablePart {
 
     @Override
     public void setMaxHealth(int maxHealth) {
+        int requestedMax = maxHealth;
+        int oldMax = this.maxHealth;
+        float oldCurrent = this.currentHealth;
         if (maxHealth > 12 && FirstAidConfig.SERVER.capMaxHealth.get())
             maxHealth = 12;
         if (maxHealth > 128) //Apply a max cap even if disabled - This is already OP and I know no use case where the limit might be reached
             maxHealth = 128;
-        this.maxHealth = Math.max(2, maxHealth); //set 2 as a minimum
-        this.currentHealth = Math.min(currentHealth, this.maxHealth);
+        int newMax = Math.max(2, maxHealth); //set 2 as a minimum
+        if (newMax == this.maxHealth && this.currentHealth <= this.maxHealth)
+            return;
 
-        int requestedMax = maxHealth;
-        float oldCurrent = currentHealth;
-        int oldMax = this.maxHealth;
+        this.maxHealth = newMax;
+        this.currentHealth = Math.min(this.currentHealth, this.maxHealth);
 
-        FirstAid.LOGGER.info(
-            "[FirstAid part clamp] part={} requestedMax={} oldMax={} newMax={} oldCurrent={} newCurrent={} capMaxHealth={}",
-            part,
-            requestedMax,
-            oldMax,
-            this.maxHealth,
-            oldCurrent,
-            this.currentHealth,
-            FirstAidConfig.SERVER.capMaxHealth.get()
-        );
+        if (FirstAidConfig.GENERAL.debug.get()) {
+            FirstAid.LOGGER.info(
+                "[FirstAid part clamp] part={} requestedMax={} oldMax={} newMax={} oldCurrent={} newCurrent={} capMaxHealth={}",
+                part,
+                requestedMax,
+                oldMax,
+                this.maxHealth,
+                oldCurrent,
+                this.currentHealth,
+                FirstAidConfig.SERVER.capMaxHealth.get()
+            );
+        }
     }
 
     @Override
